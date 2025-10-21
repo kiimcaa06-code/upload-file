@@ -1,0 +1,85 @@
+-- Fish It! Hack Script dengan Kontrol Kecepatan
+
+local player = game.Players.LocalPlayer
+local character = player.Character
+local fishingRod = character:WaitForChild("FishingRod")
+local fishHook = fishingRod:WaitForChild("FishHook")
+
+local isFishing = false
+local fishingSpeed = 1 -- Kecepatan dasar
+
+-- Fungsi untuk memulai dan menghentikan proses memancing
+local function toggleFishing()
+    if isFishing then
+        isFishing = false
+    else
+        isFishing = true
+        fishingSpeed = 5 -- Mengaktifkan kecepatan 5x
+    end
+end
+
+-- Fungsi untuk melakukan aksi memancing
+local function fish()
+    if isFishing then
+        local isFishing = true
+
+        while isFishing do
+            -- Otomatis angkat dan turunkan pancing dengan kecepatan tinggi
+            fishHook.CFrame = fishingRod.CFrame * CFrame.new(0, -5, 0)
+            wait(0.02)
+            fishHook.CFrame = fishingRod.CFrame * CFrame.new(0, 5, 0)
+            wait(0.02)
+
+            -- Simulasi tangkapan sukses dengan interval yang lebih cepat
+            local fish = Instance.new("Part")
+            fish.Name = "Fish"
+            fish.Size = Vector3.new(2, 2, 2)
+            fish.Position = fishHook.Position
+            fish.Anchored = true
+            fish.CanCollide = false
+
+            local function despawnFish()
+                wait(2) -- Mengurangi waktu sebelum ikan menghilang menjadi 2 detik
+                fish:Destroy()
+            end
+
+            despawnFish()
+        end
+    end
+end
+
+-- Menyediakan tombol untuk mengontrol aksi memancing
+local function addToggleButton()
+    local guiService = game:GetService("GuiService")
+    local toggleButton = Instance.new("TextButton")
+    toggleButton.Name = "ToggleFishingButton"
+    toggleButton.Text = "Mulai/Hentikan Pancing"
+    toggleButton.Size = UDim2.new(0, 150, 0, 50)
+    toggleButton.Position = UDim2.new(0.5, -75, 1, -75)
+    toggleButton.BackgroundColor3 = Color3.new(0, 1, 0)
+    toggleButton.Visible = true
+    toggleButton.Parent = guiService.TopScreen
+
+    toggleButton.MouseButton1Click:Connect(function()
+        toggleFishing()
+    end)
+end
+
+-- Memulai proses memancing dengan tombol
+addToggleButton()
+
+-- Memulai fungsi pancingan saat game dimulai
+fishingRod.Touched:Connect(function(hit)
+    local target = hit.Parent
+    if target.Name == "Fish" then
+        -- Otomatis memanjat ikan
+        target.Anchored = false
+        wait(0.2)
+        target.Velocity = Vector3.new(0, 50, 0)
+        wait(0.2)
+        target:Destroy()
+    end
+end)
+
+-- Memulai proses memancing
+fish()
